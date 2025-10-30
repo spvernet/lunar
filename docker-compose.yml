@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rockets-app
+    ports:
+      - "8088:8088"
+    environment:
+      - GIN_MODE=debug
+      # Puedes parametrizar el topic del bus si quieres
+      - ROCKETS_TOPIC=rockets.messages
+    volumes:
+      - .:/app
+    command: ["go", "run", "cmd/main.go"]
