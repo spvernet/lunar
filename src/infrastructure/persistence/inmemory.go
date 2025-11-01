@@ -89,15 +89,6 @@ func (s *MemoryStore) Apply(env domain.MessageEnvelope) error {
 	return nil
 }
 
-func (s *MemoryStore) ensureRocket(ch string) *domain.Rocket {
-	r, ok := s.rockets[ch]
-	if !ok {
-		r = &domain.Rocket{Channel: ch, Status: domain.StatusActive}
-		s.rockets[ch] = r
-	}
-	return r
-}
-
 func (s *MemoryStore) Get(channel string) (domain.Rocket, bool, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -137,4 +128,13 @@ func (s *MemoryStore) List(sortBy, order string) ([]domain.Rocket, error) {
 	}
 	sort.Slice(items, less)
 	return items, nil
+}
+
+func (s *MemoryStore) ensureRocket(ch string) *domain.Rocket {
+	r, ok := s.rockets[ch]
+	if !ok {
+		r = &domain.Rocket{Channel: ch, Status: domain.StatusActive}
+		s.rockets[ch] = r
+	}
+	return r
 }

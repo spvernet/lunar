@@ -7,28 +7,26 @@ import (
 	"lunar/src/application"
 	"lunar/src/domain"
 
-	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
+	"go.uber.org/zap"
 )
 
-// Consumer: suscribe a topic, deserializa y delega en ApplyMessageUC.
 type Consumer struct {
-	sub         message.Subscriber
-	logger      watermill.LoggerAdapter
-	applyUC     application.ApplyMessageUCInterface
-	topic       string
-	workerGroup string // optional: para logs/metrics
+	sub     message.Subscriber
+	log     *zap.Logger
+	applyUC application.ApplyMessageUCInterface
+	topic   string
 }
 
 func NewConsumer(
 	sub message.Subscriber,
-	logger watermill.LoggerAdapter,
+	log *zap.Logger,
 	applyUC application.ApplyMessageUCInterface,
 	topic string,
 ) *Consumer {
 	return &Consumer{
 		sub:     sub,
-		logger:  logger,
+		log:     log,
 		applyUC: applyUC,
 		topic:   topic,
 	}
@@ -42,16 +40,16 @@ func (c *Consumer) Subscribe(ctx context.Context) error {
 	go func() {
 		for msg := range msgs {
 			var env domain.MessageEnvelope
-			if err := json.Unmarshal(msg.Payload, &env); err != nil {
+			if err = json.Unmarshal(msg.Payload, &env); err != nil {
 				// NACK: Watermill gochannel reentrega (o se pierde según config);
 				// aquí ACK para no bloquear; loguea el error real.
-				c.logger.Error("failed to unmarshal", err, watermill.LogFields{"topic": c.topic})
+				c.log.Error(err.Error())
 				msg.Ack()
 				continue
 			}
-			if err := c.applyUC.Execute(env); err != nil {
+			if err = c.applyUC.Execute(env); err != nil {
 				// Puedes Nack() si quieres reintentar; en gochannel no hay persistencia.
-				c.logger.Error("apply failed", err, watermill.LogFields{"topic": c.topic})
+				c.log.Error(err.Error())
 				msg.Ack()
 				continue
 			}

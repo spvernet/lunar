@@ -5,7 +5,6 @@ import (
 	"lunar/src/domain/port"
 )
 
-//go:generate moq -out enqueue_message_uc_mock.go . EnqueueMessageUCInterface
 type EnqueueMessageUCInterface interface {
 	Execute(env domain.MessageEnvelope) error
 }

@@ -5,7 +5,6 @@ import (
 	"lunar/src/domain/port"
 )
 
-//go:generate moq -out list_rockets_uc_mock.go . ListRocketsUCInterface
 type ListRocketsUCInterface interface {
 	Execute(sortBy, order string) ([]domain.Rocket, error)
 }

@@ -10,12 +10,11 @@ import (
 )
 
 type Producer struct {
-	pub    message.Publisher
-	logger watermill.LoggerAdapter
+	pub message.Publisher
 }
 
-func NewProducer(pub message.Publisher, logger watermill.LoggerAdapter) *Producer {
-	return &Producer{pub: pub, logger: logger}
+func NewProducer(pub message.Publisher) *Producer {
+	return &Producer{pub: pub}
 }
 
 func (p *Producer) Publish(topic string, env domain.MessageEnvelope) error {
